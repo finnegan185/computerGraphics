@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="4in" height="4in" 
+     viewBox="0 0 400 400"
+     preserveAspectRatio="xMidYMid">
+	 
+    <g id="godzilla" transform="translate(0,-10)"> 
+		<animateTransform attributeName="transform" attributeType="XML"
+                        type="translate" from="0,-10" to="0,-50" dur="1s" 
+						values="0,-10; 0,-10; 0,-40; 0,-10"
+						keyTimes="0; 0.2; 0.6; 1"
+                        repeatCount="indefinite"/> 
+		<path id="zillaBod" d="M 50,360 C 60,360 100,380 150,320 L 210,190 C 225,160 250,160 260,190 L 275,185 C 285,185 285,195 280,195 L 266,200 C 260,202 260,205 266,206 L 278,207
+				C 288,210 285,215 266,220 C 240,225 240,230 240,245 C 260,270 265,330 230,345 C 220,360 170,360 160,355 C 100,400 60,360 50,360" 
+			fill="green" stroke-width="2" stroke="black"/>
+		<path id="zillLeg" d="M 205,310 C 260,280 270,325 230,358 C 225,370 220,375 250,380 C 255,385 260,388 255,390 L 230,390 L 200,370
+				L 205,355" fill="green" stroke-width="2" stroke="black"/>
+		<path id="zillaArm" d="M 230,260 C 240,270 240,280 280,278 C 288,278 288,280 280,282 C 288,284 288,285 282,287 C 288,290 288,292 270,292
+				C 260,292 220,290 220,280" fill="green" stroke-width="2" stroke="black"/>
+		<ellipse cx="245" cy="184" rx="5" ry="3.5" fill="black"/>
+		<ellipse cx="245" cy="184" rx="1.5" ry="3.5" fill="yellow"/>
+		<ellipse cx="278" cy="190" rx="2" ry="3" fill="black"/>
+		<g id="spikes">
+			<animate 
+				xlink:href="#spike"
+				attributeName="fill"
+				from="#FFFF00"
+				to="#008000" 
+				dur="1s"
+				values="#FFFF00; #FFFF00; #008000; #FFFF00"
+				keyTimes="0; 0.2; 0.5; 1"
+				repeatCount="indefinite"/>
+			<path id="spike" d="M 171,280 165,260, 182,255" fill="yellow" stroke="black" stroke-width="2"/>
+			<use xlink:href="#spike" transform="translate(-10,23)"/>
+			<use xlink:href="#spike" transform="translate(-20,46)"/>	
+			<use xlink:href="#spike" transform="translate(10,-23)"/>
+			<use xlink:href="#spike" transform="translate(22,-46)"/>
+			<use xlink:href="#spike" transform="translate(32,-69)"/>
+		</g>
+	</g>
+		<g id="breath" transform="translate(0,-10)">
+			<animate 
+				xlink:href="#breath"
+				attributeName="opacity"
+				from="1"
+				to="0" 
+				dur="1s"
+				values="1; 0.5; 0; 0"
+				keyTimes="0; 0.5; 0.8; 1"
+				repeatCount="indefinite"/>
+			<polygon points="280,200 400,175 400,225" fill="yellow"/>
+			<!-- <path id="point" d="M 280,200 C 295,200 300,180 300,185 L 298,197" fill="yellow"/> -->
+			<path id="point" d="M 280,200 C 295,200 300,180 300,181 C 302,180 305,200 308,197" fill="yellow"/>
+			<path id="btmPoint" d="M 280,200 C 295,200 300,220 300,219 C 302,220 305,200 308,203" fill="yellow"/>
+			<use xlink:href="#point" transform="translate(15,-3)"/>
+			<use xlink:href="#point" transform="translate(30,-6)"/>
+			<use xlink:href="#point" transform="translate(45,-9)"/>
+			<use xlink:href="#point" transform="translate(60,-12)"/>
+			<use xlink:href="#point" transform="translate(75,-15)"/>
+			<use xlink:href="#point" transform="translate(90,-18)"/>
+			<use xlink:href="#point" transform="translate(105,-21)"/>
+			
+			<use xlink:href="#btmPoint" transform="translate(15,3)"/>
+			<use xlink:href="#btmPoint" transform="translate(30,6)"/>
+			<use xlink:href="#btmPoint" transform="translate(45,9)"/>
+			<use xlink:href="#btmPoint" transform="translate(60,12)"/>
+			<use xlink:href="#btmPoint" transform="translate(75,15)"/>
+			<use xlink:href="#btmPoint" transform="translate(90,18)"/>
+			<use xlink:href="#btmPoint" transform="translate(105,21)"/>
+		</g>  	
+	
+
+	<g>
+		<rect x="0" y="390" width="400" height="10" fill="green" fill-opacity="1"/>
+		<rect x="0" y="380" width="400" height="10" fill="gray"/>
+		<rect x="0" y="0" width="400" height="400" fill="none" stroke-width="2" stroke="black"/>
+	</g>
+
+</svg>

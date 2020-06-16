@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, intital-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Emotional Snowman</title>
+  <style>
+    html, body {
+        margin: 0;  /* Make sure that there is no margin around the canvas */
+		overflow: hidden;  /* Make sure we don't get scroll bars. */
+    }
+    canvas {
+        display: block; /* The default display, inline, would add small margin below the canvas */
+    }
+	.center{
+		text-align: center;
+	}
+
+</style>
+</head>
+<body>
+
+	<div class="center">
+		<h2>Emotional Snowman</h>
+		<p style="font-size:13px">
+		   <label><input type="radio" id="frown" name="mouth">Frown</label>
+		   <label style="margin-left: 20px"><input type="radio" id="smile" name="mouth">Smile</label>
+		   <label style="margin-left: 60px"><input type="radio" id="angry" name="brow">Angry Eyebrows</label>
+		   <label style="margin-left: 20px"><input type="radio" id="notAngry" name="brow">Not Angry Eyebrows</label>
+		</p>
+		<p style="font-size:13px">
+			<label style="margin-left: 60px"><input type="radio" id="ominous" name="lighting">Ominous Lighting</label>
+			<label style="margin-left: 20px"><input type="radio" id="spot" name="lighting">Spot Light</label>
+			<label style="margin-left: 20px"><input type="radio" id="rotate" name="lighting">Rotating Light</label>		
+			<p style="font-size:13px">
+			  	<label style="margin-left: 20px"><input type="radio" id="green" name="color">Green Light</label>		
+				<label style="margin-left: 20px"><input type="radio" id="blue" name="color">Blue Light</label>		
+				<label style="margin-left: 20px"><input type="radio" id="red" name="color">Red Light</label>		
+				<label style="margin-left: 20px"><input type="radio" id="purple" name="color">Purple Light</label>		
+			</p>
+		</p>
+	</div>
+
+
+	<script src="three.js"></script>
+	<script src="three.min.js"></script>
+	<script src="three.module.js"></script>
+	<script src="TrackballControls.js"></script>
+	  
+	<script>
+//----------- Setting up the radio buttons and some global variables-----------
+		document.getElementById("frown").checked = true;
+		document.getElementById("frown").onchange = updateButtons;
+		document.getElementById("smile").onchange = updateButtons;
+		var frown = document.getElementById("frown").checked;
+		//var smile = document.getElementById("smile").checked;
+		
+		document.getElementById("angry").checked = true;
+		document.getElementById("angry").onchange = updateButtons;
+		document.getElementById("notAngry").onchange = updateButtons;
+		var angry = document.getElementById("angry").checked;
+		//var notAngry = document.getElementById("notAngry").checked;
+		
+		document.getElementById("ominous").checked = true;
+		document.getElementById("ominous").onchange = updateButtons;
+		document.getElementById("spot").onchange = updateButtons;
+		document.getElementById("rotate").onchange = updateButtons;
+		var ominous = document.getElementById("ominous").checked;
+		var spot;
+		var rotate;
+		
+		document.getElementById("green").checked = true;
+		document.getElementById("green").onchange = updateButtons;
+		document.getElementById("blue").onchange = updateButtons;
+		document.getElementById("red").onchange = updateButtons;
+		document.getElementById("purple").onchange = updateButtons;
+		var green = true;
+		var blue = false;
+		var red = false;
+		var purple = false;
+		
+
+		var currentColor = 0x46FA1A;
+		var currentMouth;
+		var currentBrow;
+		var currentLighting;
+		
+//------------- Setting up the scene, camera and canvas ------------------
+		var scene = new THREE.Scene();
+		  
+		var camera = new THREE.PerspectiveCamera(100, window.innerWidth/window.innerHeight, 0.1, 1000);
+		  
+		var renderer = new THREE.WebGLRenderer({antialias: true});
+		renderer.setClearColor("#e5e5e5");
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		  
+		var canvas = renderer.domElement;
+		  
+		document.body.appendChild(renderer.domElement);
+		  
+		window.addEventListener("resize", () => {
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			camera.aspect = window.innerWidth/window.innerHeight;
+			
+			camera.updateProjectionMatrix();
+		});
+		  
+		var raycaster = new THREE.Raycaster();
+		var mouse = new THREE.Vector2();
+		
+//---------------------------- Planes ------------------------------------------
+		var planeGeometry = new THREE.PlaneBufferGeometry( 20, 20, 32, 32 );
+		var planeMaterial = new THREE.MeshStandardMaterial( { color: 0xe5e5e5 } )
+		var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+		
+		plane.receiveShadow = true;
+		plane.position.y = -4;
+		plane.rotation.x = -1.5;
+		scene.add(plane);
+		
+		var plane2 = new THREE.Mesh(planeGeometry, planeMaterial);
+		
+		plane2.receiveShadow = true;
+		plane2.position.y = 6;
+		plane2.rotation.x = 1.5;
+		scene.add(plane2);
+		
+		var planeGeometry2 = new THREE.PlaneBufferGeometry( 20, 9, 4, 4 );
+		var plane3 = new THREE.Mesh(planeGeometry2, planeMaterial);
+		
+		plane3.receiveShadow = true;
+		plane3.position.set(0,1.2,-10);
+		scene.add(plane3);
+		
+		var planeGeometry4 = new THREE.PlaneBufferGeometry( 20, 12, 4, 4 );
+		var plane4 = new THREE.Mesh(planeGeometry4, planeMaterial);
+		
+		plane4.receiveShadow = true;
+		plane4.rotation.y = 1.58;
+		plane4.position.set(-9.5,1.2,0);
+		scene.add(plane4);
+		
+		var plane5 = new THREE.Mesh(planeGeometry4, planeMaterial);
+		plane5.receiveShadow = true;
+		plane5.rotation.y = -1.58;
+		plane5.position.set(9.5,1.2,0);
+		scene.add(plane5)
+		  
+		  
+//------------------ Snowman Body Creation --------------------------------------
+		var geometry = new THREE.SphereGeometry(1, 40, 40);
+		var bodyC = new THREE.MeshStandardMaterial({color: 0xFDFEFE});
+		var head = new THREE.Mesh(geometry, bodyC);
+		 
+		head.position.set(0,1.9,0);
+		head.scale.y = .85;
+		head.receiveShadow = true;
+		head.castShadow = true;
+		  
+		var geometry2 = new THREE.SphereGeometry(1.5, 40, 40);
+		var torso = new THREE.Mesh(geometry2, bodyC);
+
+		torso.scale.y = .9;
+		torso.receiveShadow = true;
+		torso.castShadow = true;
+		
+		var geometry3 = new THREE.SphereGeometry(2, 40, 40);
+		var bottom = new THREE.Mesh(geometry3, bodyC);
+
+		bottom.position.set(0,-2.8,0);
+		bottom.scale.y = .9;
+		bottom.receiveShadow = true;
+		bottom.castShadow = true;
+		
+		var body = new THREE.Group();
+		body.add(head);
+		body.add(torso);
+		body.add(bottom);
+		scene.add(body);
+		
+		var bodyParts = [head, torso, bottom];
+		
+//------------------------- Coal(Buttons, Mouth and Eyes) Creation ------------------------		
+		var geometry4 = new THREE.DodecahedronGeometry(.1);
+		var buttonC = new THREE.MeshStandardMaterial({color: 0x212F3D});
+		 
+		var smilePositions = [[0,0,1.5], [0,.6, 1.35], [0,-.6,1.35],[0,1.4,.79],
+						 [-.25,1.45,.8],[.25,1.45,.8],[.5,1.58,.77],
+						 [-.5,1.58,.77],[-.25,2,.93],[.25,2,.93]];
+						 
+		var smilePos = [[0,1.4,.79], [-.25,1.45,.8],[.25,1.45,.8],
+						[.5,1.58,.77], [-.5,1.58,.77]];
+						
+		var frownPos = [[0,1.59,.93], [-.25,1.56,.87],[.25,1.56,.87],
+						[.5,1.5,.74], [-.5,1.5,.74]];
+						 
+		var coalPositions = [[0,0,1.5], [0,.6, 1.35], [0,-.6,1.35],[0,1.59,.93],
+						 [-.25,1.56,.87],[.25,1.56,.87],[.5,1.5,.74],
+						 [-.5,1.5,.74],[-.25,2,.93],[.25,2,.93]];
+						 
+		var faceCoals = [];
+		
+		for(var i = 0; i < coalPositions.length; i++){
+			var coal = new THREE.Mesh(geometry4, buttonC);
+			coal.castShadow = true;
+			coal.position.x = coalPositions[i][0];
+			coal.position.y = coalPositions[i][1];
+			coal.position.z = coalPositions[i][2];
+			scene.add(coal);
+			if(i < 8 && i > 2){
+				faceCoals.push(coal);
+			}
+		}
+		
+		currentMouth = frown;
+		
+//------------------------ Nose --------------------------------------		
+		var geometry5 = new THREE.CylinderGeometry(0, .1, .5, 10);
+		var noseC = new THREE.MeshStandardMaterial({color: 0xF5B041});
+		var nose = new THREE.Mesh(geometry5, noseC);
+
+		nose.castShadow = true;
+		nose.rotation.x = 1.8;
+		nose.position.set(0,1.75,1.2);
+		scene.add(nose);
+		
+//------------------------ Eyebrows -----------------------------------------		
+		var geometry6 = new THREE.CylinderGeometry(.05, .05, .35, 6);
+		var brown = new THREE.MeshStandardMaterial({color: 0x523300});
+		var eyebrow = new THREE.Mesh(geometry6, brown);
+
+		eyebrow.castShadow = true;
+		eyebrow.rotation.z = 2;
+		eyebrow.rotation.y = .3;
+		eyebrow.position.set(.23,2.13,.95);
+		scene.add(eyebrow);
+	
+		var eyebrow2 = new THREE.Mesh(geometry6, brown);
+
+		eyebrow2.castShadow = true;
+		eyebrow2.rotation.z = -2;
+		eyebrow2.rotation.y = -.3;
+		eyebrow2.position.set(-.23,2.13,.95);
+		scene.add(eyebrow2);
+
+		
+		currentBrow = angry;
+		
+//----------------------------- Hat Creation ----------------------------------------		
+		var geometry7 = new THREE.CylinderGeometry(1.2, 1.2, .1, 100);
+		var hatC = new THREE.MeshStandardMaterial({color: 0x0E0901});
+		var hatRim = new THREE.Mesh(geometry7, hatC);
+		
+		hatRim.castShadow = true;
+		hatRim.position.y = 2.4;
+		
+		var geometry8 = new THREE.CylinderGeometry(.9, .8, 1, 100);
+		var hatTop = new THREE.Mesh(geometry8, hatC);
+		
+		hatTop.castShadow = true;
+		hatTop.position.y = 2.9;
+		
+		var geometry9 = new THREE.CylinderGeometry(.85, .85, .2, 100);
+		var beltC = new THREE.MeshStandardMaterial({color: 0xC30E0E});
+		var hatBelt = new THREE.Mesh(geometry9, beltC);
+		
+		hatBelt.castShadow = true;
+		hatBelt.position.y = 2.55;
+		
+		var buckleG = new THREE.TorusGeometry(.2, .05, 20, 4 );
+		var buckleC = new THREE.MeshStandardMaterial({color: 0xFFD700});
+		var buckle = new THREE.Mesh(buckleG, buckleC);
+		
+		buckle.castShadow = true;
+		buckle.position.set(0,2.55,.85);
+		buckle.rotation.z = .8;
+		
+		var prongG = new THREE.CylinderGeometry(.017, .03, .2, 20);
+		var prongC = new THREE.MeshStandardMaterial({color: 0xFFD700});
+		var prong = new THREE.Mesh(prongG, prongC);
+		
+		prong.castShadow = true;
+		prong.position.set(-.07,2.55,.86)
+		prong.rotation.z = 1.6;
+		prong.rotation.y = .5;
+		
+		var hat = new THREE.Group();
+		hat.add(hatRim);
+		hat.add(hatTop);
+		hat.add(hatBelt);
+		hat.add(buckle);
+		hat.add(prong);
+		scene.add(hat);
+		
+//----------------------------- Arms Creation ----------------------------------
+		var geometry10 = new THREE.CylinderGeometry(.05, .05, 2.3, 6);
+		var arm = new THREE.Mesh(geometry10, brown);
+		
+		arm.castShadow = true;
+		arm.position.set(2.2, .5, 1)
+		arm.rotation.z = -1.1;
+		arm.rotation.y = -.7;
+		scene.add(arm);
+		
+		var arm2 = new THREE.Mesh(geometry10, brown);
+		
+		arm2.castShadow = true;
+		arm2.position.set(-2.2, .5, 1)
+		arm2.rotation.z = 1.1;
+		arm2.rotation.y = .7;
+		scene.add(arm2);
+		
+		var fingerPositioning = [[2.85,1.07,1.58,.5,-.3],[2.93,.78,1.64,-.9,-2.5],
+								[-2.75,1.07,1.58,.5,-.3],[-2.93,.78,1.63,2.3,.7]];
+		
+		var geometry11 = new THREE.CylinderGeometry(.02, .04, .4, 6)
+		for(var i = 0; i < fingerPositioning.length; i++){
+			var finger = new THREE.Mesh(geometry11, brown);
+			finger.castShadow = true;
+			finger.position.x = fingerPositioning[i][0];
+			finger.position.y = fingerPositioning[i][1];
+			finger.position.z = fingerPositioning[i][2];
+			finger.rotation.x = fingerPositioning[i][3];  
+			finger.rotation.z = fingerPositioning[i][4];
+			scene.add(finger);
+		}
+		
+		
+//------------------------- Camera and Lights--------------------------------
+		camera.position.z = 6;
+		camera.position.y = 2;
+		  
+		var ominousLight1 = new THREE.PointLight(0xFDFEFE, 1, 1000);
+		ominousLight1.position.set(5,-25,20);
+		ominousLight1.castShadow = true;
+		scene.add(ominousLight1);
+		  
+		var ominousLight2 = new THREE.PointLight(0xFDFEFE, .3, 1000);
+		ominousLight2.position.set(0,1,50);
+		ominousLight2.castShadow = true;
+		scene.add(ominousLight2);
+		
+		var object = new THREE.Object3D();
+		object.position.set(0,1.9,1);
+		
+		scene.add(object);
+		
+		var spotLight1 = new THREE.SpotLight(0xFAF63A, 0, 500, Math.PI/5);
+		spotLight1.position.set(.5,4,2);
+		spotLight1.castShadow = true;
+		scene.add(spotLight1);
+		scene.add(spotLight1.target);
+		spotLight1.target = object;
+		
+		var spotLight2 = new THREE.AmbientLight(0xFFFEE3, 0);
+		scene.add(spotLight2);
+		
+		spotLight1.shadow.mapSize.width = 512;
+		spotLight1.shadow.mapSize.height = 512;
+		spotLight1.shadow.camera.near = 0.5;
+		spotLight1.shadow.camera.far = 10;
+		
+		var rotatingLight = new THREE.DirectionalLight(currentColor, 0);
+		rotatingLight.position.set(0,0,20);
+		rotatingLight.castShadow = true;
+		scene.add(rotatingLight);
+		
+		currentLighting = ominous;
+		
+		var workiGeo = new THREE.SphereGeometry(1, 10, 10);
+		var testBall = new THREE.Mesh(workiGeo, brown);
+		testBall.position.set(3, 1, 0);
+		  
+		  
+//------------------------- Controls and Animation ---------------------------------
+		var controls = new THREE.TrackballControls(camera, canvas);  // note: TrackballControls require animation.
+		controls.noPan = true;   // Don't do panning with the right mosue button.
+		controls.noZoom = false;  // Don't do zooming with middle mouse button.
+		  
+		function animate(){
+			requestAnimationFrame(animate);
+			controls.update();
+			updateForFrame();
+			rotatingLight.color.setHex(currentColor);
+			renderer.render(scene, camera);
+		}
+		animate();
+		
+		var angle = 0;
+		var r = 50;
+		var increment = 2 * Math.PI / 1000;
+		
+		function updateForFrame(){			
+			if(currentMouth){
+				doFrown();
+			}
+			if(!currentMouth){
+				doSmile();
+			}
+			if(currentBrow){
+				doAngryBrow();
+			}
+			if(!currentBrow){
+				doNotAngryBrow();
+			}
+			if(currentLighting == ominous){
+				rotatingLight.intensity = 0;
+				spotLight1.intensity = 0;
+				spotLight2.intensity = 0;
+				ominousLight1.intensity = 1;
+				ominousLight2.intensity = .3;
+			}
+			if(currentLighting == spot){
+				rotatingLight.intensity = 0;
+				ominousLight1.intensity = 0;
+				ominousLight2.intensity = 0;
+				spotLight1.intensity = .8;
+				spotLight2.intensity = .5;				
+			}
+			if(currentLighting == rotate){
+				ominousLight1.intensity = 0;
+				ominousLight2.intensity = 0;
+				spotLight1.intensity = 0;
+				spotLight2.intensity = 0;
+				rotatingLight.intensity = 1;
+				angle += increment;
+				rotatingLight.position.x = r * Math.cos(angle);
+				rotatingLight.position.z = r * Math.sin(angle);
+				
+			}
+		}
+		
+		function doFrown(){
+			if(faceCoals[0].position.y < 1.59){
+				faceCoals[0].position.y += .0015;
+			}
+			if(faceCoals[0].position.z < .93){
+				faceCoals[0].position.z += .0015;
+			}
+			if(faceCoals[1].position.y < 1.56){
+				faceCoals[1].position.y += .001;
+				faceCoals[2].position.y += .001;
+			}
+			if(faceCoals[1].position.z < .87){
+				faceCoals[1].position.z += .001;
+				faceCoals[2].position.z += .001;
+			}
+			if(faceCoals[3].position.y > 1.5){
+				faceCoals[3].position.y -= .0007;
+				faceCoals[4].position.y -= .0007;
+			}
+			if(faceCoals[3].position.z > .74){
+				faceCoals[3].position.z -= .0005;
+				faceCoals[4].position.z -= .0005;
+			}
+		}
+		
+		function doSmile(){
+			if(faceCoals[0].position.y >= 1.4){
+				faceCoals[0].position.y -= .0015;
+			}
+			if(faceCoals[0].position.z >= .8){
+				faceCoals[0].position.z -= .001;
+			}
+			if(faceCoals[1].position.y >= 1.45){
+				faceCoals[1].position.y -= .001;
+				faceCoals[2].position.y -= .001;
+			}
+			if(faceCoals[1].position.z >= .81){
+				faceCoals[1].position.z -= .00075;
+				faceCoals[2].position.z -= .00075;
+			}
+			if(faceCoals[3].position.y <= 1.58){
+				faceCoals[3].position.y += .0007;
+				faceCoals[4].position.y += .0007;
+			}
+			if(faceCoals[3].position.z <= .77){
+				faceCoals[3].position.z += .0005;
+				faceCoals[4].position.z += .0005;
+			}
+		}
+		
+		function doAngryBrow(){
+			if(eyebrow.rotation.z <= 2){
+				eyebrow.rotation.z += .005;
+				eyebrow2.rotation.z -= .005;
+				eyebrow.position.x -= .0001;
+				eyebrow2.position.x += .0001;
+				eyebrow.position.y -= .0001;
+				eyebrow2.position.y -= .0001;
+				eyebrow.position.z += .0001;
+				eyebrow2.position.z += .0001;
+
+			}
+		}
+		
+		function doNotAngryBrow(){
+			if(eyebrow.rotation.z >= 1.6){
+				eyebrow.rotation.z -= .005;
+				eyebrow2.rotation.z += .005;
+				eyebrow.position.x += .0001;
+				eyebrow2.position.x -= .0001;
+				eyebrow.position.y += .0001;
+				eyebrow2.position.y += .0001;
+				eyebrow.position.z -= .0001;
+				eyebrow2.position.z -= .0001;
+
+			}
+		}
+		
+		function updateButtons(){
+			frown = document.getElementById("frown").checked;
+			currentMouth = frown;
+			
+			angry = document.getElementById("angry").checked;
+			currentBrow = angry;
+	
+			ominous = document.getElementById("ominous").checked;
+			spot = document.getElementById("spot").checked;
+			rotate = document.getElementById("rotate").checked;
+			
+			green = document.getElementById("green").checked;
+			blue = document.getElementById("blue").checked;
+			red = document.getElementById("red").checked;
+			purple = document.getElementById("purple").checked;
+
+			if(ominous){
+				currentLighting = ominous;
+			}
+			if(spot){
+				currentLighting = spot;
+			}
+			if(rotate){
+				currentLighting = rotate;
+			}
+			if(green){
+				currentColor = 0x46FA1A;
+			}
+			if(blue){
+				currentColor = 0x1A3AFA;
+			}
+			if(red){
+				currentColor = 0xF51919;
+			}
+			if(purple){
+				currentColor = 0xC355EF;
+			}
+
+		}
+
+  </script>
+</body>
+</html>
+  
